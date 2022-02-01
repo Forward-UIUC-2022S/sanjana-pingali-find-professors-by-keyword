@@ -1,1 +1,1 @@
-# sanjana-pingali-find-professors-by-keyword
+# find-professors-by-keyword
