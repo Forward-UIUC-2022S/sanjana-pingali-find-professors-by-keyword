@@ -5,8 +5,13 @@ The main schemas from the MAG dataset of siginificance to ranking papers by auth
 
 ![alt text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/Untitled%20drawing%20(9).jpg)
 
-The algorithm will start off by creating embeddings for the Papers using the Papers schema in the MAG database and for the professors using the Authors schema from the MAG database. These embeddings store simplify the amount of data needed to be stored to compute this ranking. 
+Creating Embeddings
+------------------------------
+The algorithm will start off by creating embeddings for the Papers using the Papers schema in the MAG database and for the professors using the Authors schema from the MAG database. These embeddings help simplify the amount of data needed to be stored while computing this ranking and store only relevant data. 
 
+Generate match scores for professors and papers
 -------------------------------
 
-Match 
+Find highest ranked papers using embeddings
+-------------------------------
+
