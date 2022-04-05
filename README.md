@@ -21,4 +21,6 @@ If we do not choose to consider citations as a factor that contributes to this r
 
 ![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/without_citations.JPG)
 
+The final rank metric uses the previous rc_q rank obtained which was updated based on whether we wanted to consider citations and this ranking criteria adds a weight based on how active a researcher has been in a field in the past 5 years in terms of publishing papers as compared to their whole career. If they publish more papers recently then there will be a higher proportion value.
+
 ![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/rank_based_on_activity.JPG)
