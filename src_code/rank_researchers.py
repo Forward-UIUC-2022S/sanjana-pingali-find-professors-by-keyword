@@ -110,10 +110,10 @@ def compute_author_keyword_ranks(db,year_flag):
             parent_id INT,
             kw_id BIGINT,
             citation INT,
-            title VARCHAR(255),
             publication_id BIGINT,
             year INT,
             comp_score DECIMAL,
+            title VARCHAR(255),
             PRIMARY KEY(author_id, publication_id, parent_id)
         )
         SELECT author_id,
@@ -121,13 +121,16 @@ def compute_author_keyword_ranks(db,year_flag):
         MIN(FoS_id) AS kw_id,
         MAX(max_npmi) AS max_npmi,
         citation,
-        Publication_Scores.publication_title as title,
         Publication_Scores.publication_id as publication_id,
         year, 
         CASE 
-            WHEN """ + str(year_flag) +""" = 1 THEN (year/%s)*MAX(max_npmi) * citation
+            WHEN """ + str(year_flag) +""" = 1 THEN POWER(0.9,(%s-year))*MAX(max_npmi) * citation
             ELSE MAX(max_npmi) * citation
-        END AS comp_score
+        END AS comp_score,
+        CASE
+            WHEN Publication_Scores.publication_title LIKE %s THEN SUBSTRING(Publication_Scores.publication_title, 1, LENGTH(Publication_Scores.publication_title) - 1)
+            ELSE Publication_Scores.publication_title
+        END AS title
         FROM
         (
             SELECT author_id, publication_id, Publication.year AS year, 
@@ -153,7 +156,7 @@ def compute_author_keyword_ranks(db,year_flag):
     """
    
     cur = db.cursor()
-    cur.execute(create_author_ranks_sql, (current_year,))
+    cur.execute(create_author_ranks_sql, (current_year,'%.'))
 
     cur.close()
 
@@ -189,9 +192,13 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
     dict_of_author_keywords = {}
 
     get_author_papers = """
-        SELECT Author.id, Author.name, Author_Keyword_Scores.title, row_number() over (partition by Author.id order by Author_Keyword_Scores.comp_score desc) as publication_title, Author_Keyword_Scores.parent_id
-        FROM Author_Keyword_Scores
-        JOIN Author ON id = author_id 
+        SELECT TABLE1.author_id, Author.name, TABLE1.title, row_number() over (partition by Author.id order by TABLE1.comp_score desc) as publication_rank, TABLE1.parent_id
+        FROM Author JOIN(
+            SELECT author_id, Author_Keyword_Scores.title as title, parent_id, comp_score
+            FROM Author_Keyword_Scores
+            GROUP BY Author_Keyword_Scores.title
+        ) AS TABLE1 ON TABLE1.author_id = Author.id
+        GROUP BY TABLE1.title
     """
     cur = db.cursor()
     cur.execute(get_author_papers)
@@ -202,13 +209,13 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
         else:
                 dict_of_author_keywords[each_record[0]].append(each_record[4])
     for each_record in author_papers:
-        if set(keyword_ids) == set(dict_of_author_keywords[each_record[0]]):
-            if each_record[3] <=5:
-                if each_record[0] not in dict_of_authors:
-                    dict_of_authors[each_record[0]] = [each_record[2]]
+        if set(keyword_ids) == set(dict_of_author_keywords[each_record[0]]): #only get the authors that have all parent keywords
+            if each_record[3] <=5: # restrict to top 5 entries
+                if each_record[0] not in dict_of_authors: # only then add author and its list of titles
+                    dict_of_authors[each_record[0]] = [each_record[2]] 
                 else:
                     dict_of_authors[each_record[0]].append(each_record[2])
-        list_of_authors = tuple(dict_of_authors.keys())
+        list_of_authors = tuple(dict_of_authors.keys()) # get all relevant authors
    
     #print("here4")
 
@@ -226,28 +233,16 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
     for each_author_citation in author_citations:
          dict_of_author_citation[each_author_citation[0]] = each_author_citation[1]
 
-    max_value = dict_of_author_citation[max(dict_of_author_citation, key=dict_of_author_citation.get)]
+    max_value = dict_of_author_citation[max(dict_of_author_citation, key=dict_of_author_citation.get)] # get key of highest value to normalize
 
     #print("here3")
 
     print(max_value)
 
     # get_author_ranks_sql = """
-    #     SELECT Author.id, Author.name, Author_Keyword_Scores.title,
-    #     CASE 
-    #         WHEN """ + str(frequency_of_publication_flag) +""" = 1 THEN (publication_count/(%s-Min_year))*int_score
-    #         ELSE int_score
-    #     END AS score
+    #     SELECT Author.id, Author.name, Author_Keyword_Scores.title,SUM(comp_score) as score
     #     FROM Author_Keyword_Scores
-    #     JOIN Author ON Author.id = Author_Keyword_Scores.author_id JOIN
-    #                               (SELECT author_id, COUNT(*) as publication_count, MIN(year) as Min_year,
-    #                                 CASE 
-    #                                     WHEN """ + str(citation_flag) +""" = 1 THEN (SUM(Author_Keyword_Scores.citation)/%s)*SUM(comp_score)
-    #                                     ELSE SUM(comp_score)
-    #                                 END AS int_score
-    #                                FROM Author_Keyword_Scores 
-    #                                GROUP BY author_id
-    #                               ) as T1 ON T1.author_id = Author_Keyword_Scores.author_id
+    #     JOIN Author ON Author.id = Author_Keyword_Scores.author_id
     #     GROUP BY Author_Keyword_Scores.author_id
     #     ORDER BY score DESC
     #     LIMIT 15
@@ -256,27 +251,32 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
     get_author_ranks_sql = """
         SELECT Author.id, Author.name, Author_Keyword_Scores.title,
         CASE 
-            WHEN """ + str(frequency_of_publication_flag) +""" = 1 THEN (publication_count/(%s-Min_year))*int_score
+            WHEN """ + str(frequency_of_publication_flag) +""" = 1 THEN (publication_count_5_years/publication_count)*int_score
             ELSE int_score
         END AS score
         FROM Author_Keyword_Scores
         JOIN Author ON Author.id = Author_Keyword_Scores.author_id JOIN
-                                  (SELECT author_id, COUNT(*) as publication_count, MIN(year) as Min_year, 
+                                  (SELECT Author_Keyword_Scores.author_id, COUNT(*) as publication_count, publication_count_5_years, 
                                     CASE 
                                         WHEN """ + str(citation_flag) +""" = 1 THEN (SUM(Author_Keyword_Scores.citation)/%s)*SUM(comp_score)
                                         ELSE SUM(comp_score)
                                     END AS int_score
-                                   FROM Author_Keyword_Scores 
-                                   WHERE author_id IN """ + str(list_of_authors) + """
-                                   GROUP BY author_id
+                                   FROM Author_Keyword_Scores JOIN ( SELECT author_id, COUNT(*) as publication_count_5_years
+                                                                     FROM Author_Keyword_Scores
+                                                                     WHERE %s- year <=5
+                                                                    GROUP BY author_id
+                                   ) inner_query ON inner_query.author_id = Author_Keyword_Scores.author_id
+                                   WHERE Author_Keyword_Scores.author_id IN """ + str(list_of_authors) + """
+                                   GROUP BY Author_Keyword_Scores.author_id
                                   ) as T1 ON T1.author_id = Author_Keyword_Scores.author_id
         GROUP BY Author_Keyword_Scores.author_id
         ORDER BY score DESC
-        LIMIT 15
+        LIMIT 15    
     """
     
 
-    cur.execute(get_author_ranks_sql, (current_year,max_value,))
+    #cur.execute(get_author_ranks_sql)
+    cur.execute(get_author_ranks_sql, (current_year,current_year,))
     author_ranks = cur.fetchall()
 
 
@@ -316,8 +316,8 @@ def main():
     db = mysql.connector.connect(
     host='localhost',
     user="root",
-    password="<password_to_be_added>",
-    database="<db_to_be_added>"
+    password="<password_of_db>",
+    database="<db_used>"
     )
     
     cur = db.cursor()
