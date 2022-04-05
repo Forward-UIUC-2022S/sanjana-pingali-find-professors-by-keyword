@@ -316,8 +316,8 @@ def main():
     db = mysql.connector.connect(
     host='localhost',
     user="root",
-    password="14converseS@",
-    database="database_week_4"
+    password="<password_to_be_added>",
+    database="<db_to_be_added>"
     )
     
     cur = db.cursor()
