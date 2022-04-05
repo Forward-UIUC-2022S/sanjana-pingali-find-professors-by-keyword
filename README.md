@@ -13,7 +13,7 @@ Here this similarity is represented by s(in) where i is the paper being consider
 
 This will affect the similarity value between papers and keywords so that papers that are too old by a specific author linked to these words will not be given as much importance.
 
-2. The next criteria that is used for ranking is the amount of citations for that particular author. This ranking is based on the idea using a weight that is a result of adding up all citations across all papers of an author and dividing by the largest citations for a single author. This weight will be lowered the lower citations am author has to other similar authors related to these keywords.
+2. The next criteria that is used for ranking is the amount of citations for that particular author. This ranking is based on the idea using a weight that is a result of adding up all citations across all papers of an author and dividing by the largest citations for a single author. This weight will be lowered the lower citations am author has to other similar authors related to these keywords. Here p refers to total published papers of an author and q refers to the specicifc author.
 
 ![alt text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/equation_for_citations.JPG)
 
