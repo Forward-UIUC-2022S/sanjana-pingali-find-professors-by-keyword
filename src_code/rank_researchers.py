@@ -88,7 +88,7 @@ def store_keywords(db,keyword_ids, make_copy=True):
 
 
 
-def compute_author_keyword_ranks(db,year_flag):
+def compute_author_keyword_ranks(db,year_flag, author_count_per_paper_flag):
     """
     Computes and stores score for each publication
     Arguments:
@@ -100,6 +100,28 @@ def compute_author_keyword_ranks(db,year_flag):
     keyword is computed as max_npmi * citation. A score is computed for each
     publication-keyword pair.
     """
+    cur = db.cursor()
+    drop_table_sql = "DROP TABLE IF EXISTS Author_count_per_paper"
+    cur.execute(drop_table_sql)
+
+    Author_count_per_paper = """
+       CREATE TABLE Author_count_per_paper (
+        publication_id BIGINT NOT NULL,
+        author_count INT,
+        PRIMARY KEY(publication_id)
+    )
+     SELECT publication_mag_id as publication_id, COUNT(author_id) as author_count
+     FROM Publication_Author
+     GROUP BY publication_mag_id
+    """
+
+    cur = db.cursor()
+    cur.execute(Author_count_per_paper)
+
+    cur.close()
+
+
+
     cur = db.cursor()
     drop_table_sql = "DROP TABLE IF EXISTS Author_Keyword_Scores"
     cur.execute(drop_table_sql)
@@ -123,26 +145,27 @@ def compute_author_keyword_ranks(db,year_flag):
         citation,
         Publication_Scores.publication_id as publication_id,
         year, 
-        CASE 
-            WHEN """ + str(year_flag) +""" = 1 THEN POWER(0.9,(%s-year))*MAX(max_npmi) * citation
-            ELSE MAX(max_npmi) * citation
-        END AS comp_score,
         CASE
-            WHEN Publication_Scores.publication_title LIKE %s THEN SUBSTRING(Publication_Scores.publication_title, 1, LENGTH(Publication_Scores.publication_title) - 1)
-            ELSE Publication_Scores.publication_title
-        END AS title
+           WHEN """ + str(author_count_per_paper_flag) +""" = 1 THEN int_score*MAX(max_npmi) * citation/Author_count_per_paper.author_count
+        ELSE MAX(max_npmi) * citation*int_score
+        END AS comp_score,
+        Publication_Scores.publication_title AS title
         FROM
         (
-            SELECT author_id, publication_id, Publication.year AS year, 
+            SELECT author_id, Publication_FoS.publication_id, Publication.year AS year, 
             MAX(npmi) as max_npmi, Publication.title as publication_title,
-            IFNULL(citation, 0) AS citation
+            IFNULL(citation, 0) AS citation,
+            CASE 
+            WHEN """ + str(year_flag) +""" = 1 THEN POWER(0.9,(%s-year))
+            ELSE 1
+            END AS int_score
             FROM Top_Keywords
             JOIN Publication_FoS ON Top_Keywords.id = FoS_id
-            JOIN Publication_Author ON publication_mag_id = publication_id
-            JOIN Publication ON publication_id = Publication.id
+            JOIN Publication_Author ON publication_mag_id = Publication_FoS.publication_id
+            JOIN Publication ON Publication_FoS.publication_id = Publication.id
             GROUP BY author_id, Publication.id, parent_id
         ) AS Publication_Scores
-        JOIN
+        JOIN 
         (
             SELECT publication_id,
             parent_id, FoS_id, npmi
@@ -150,13 +173,14 @@ def compute_author_keyword_ranks(db,year_flag):
             JOIN Publication_FoS ON FoS_id = id
         ) AS Publication_Top_Keywords
         ON ABS(max_npmi - npmi) < 0.000001
-        AND Publication_Top_Keywords.publication_id = Publication_Scores.publication_id
+        AND Publication_Top_Keywords.publication_id = Publication_Scores.publication_id 
+        JOIN Author_count_per_paper ON Author_count_per_paper.publication_id = Publication_Top_Keywords.publication_id
         GROUP BY author_id, Publication_Scores.publication_id, parent_id
     
     """
    
     cur = db.cursor()
-    cur.execute(create_author_ranks_sql, (current_year,'%.'))
+    cur.execute(create_author_ranks_sql, (current_year,))
 
     cur.close()
 
@@ -167,7 +191,7 @@ def compute_author_keyword_ranks(db,year_flag):
 
 
 
-def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of_publication_flag):
+def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of_publication_flag, author_count_per_paper_flag):
     """
     Main function that returns the top ranked authors for some keywords
     Arguments:
@@ -184,7 +208,7 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
 
     # Compute scores between each publication and input keyword
 
-    compute_author_keyword_ranks(db,year_flag)
+    compute_author_keyword_ranks(db,year_flag, author_count_per_paper_flag)
 
 
     # Aggregate scores for each author
@@ -328,6 +352,7 @@ def main():
     parser.add_argument('year_flag', type = int)
     parser.add_argument('citation_flag', type = int)
     parser.add_argument('frequency_of_publication_flag', type = int)
+    parser.add_argument('author_count_per_paper_flag', type = int)
     args = parser.parse_args()
 
     # Ids of all keywords can be found in FoS table
@@ -343,7 +368,7 @@ def main():
 
     #print(args.year_flag, args.citation_flag)
 
-    top_authors = rank_authors_keyword(keyword_ids, db, args.year_flag, args.citation_flag,args.frequency_of_publication_flag)
+    top_authors = rank_authors_keyword(keyword_ids, db, args.year_flag, args.citation_flag,args.frequency_of_publication_flag, args.author_count_per_paper_flag)
 
 if __name__ == '__main__':
     main()
