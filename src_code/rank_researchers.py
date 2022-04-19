@@ -88,7 +88,7 @@ def store_keywords(db,keyword_ids, make_copy=True):
 
 
 
-def compute_author_keyword_ranks(db,year_flag, author_count_per_paper_flag):
+def compute_author_keyword_ranks(db,year_flag, author_count_per_paper_flag, pioneer_flag):
     """
     Computes and stores score for each publication
     Arguments:
@@ -191,7 +191,7 @@ def compute_author_keyword_ranks(db,year_flag, author_count_per_paper_flag):
 
 
 
-def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of_publication_flag, author_count_per_paper_flag):
+def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of_publication_flag, author_count_per_paper_flag, pioneer_flag):
     """
     Main function that returns the top ranked authors for some keywords
     Arguments:
@@ -208,7 +208,7 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
 
     # Compute scores between each publication and input keyword
 
-    compute_author_keyword_ranks(db,year_flag, author_count_per_paper_flag)
+    compute_author_keyword_ranks(db,year_flag, author_count_per_paper_flag, pioneer_flag)
 
 
     # Aggregate scores for each author
@@ -294,7 +294,9 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
                                    GROUP BY Author_Keyword_Scores.author_id
                                   ) as T1 ON T1.author_id = Author_Keyword_Scores.author_id
         GROUP BY Author_Keyword_Scores.author_id
-        ORDER BY score DESC
+        ORDER BY 
+        CASE WHEN """+str(pioneer_flag)+"""=1  THEN year
+        END ASC, score DESC
         LIMIT 15    
     """
     
@@ -353,6 +355,7 @@ def main():
     parser.add_argument('citation_flag', type = int)
     parser.add_argument('frequency_of_publication_flag', type = int)
     parser.add_argument('author_count_per_paper_flag', type = int)
+    parser.add_argument('pioneer_flag', type = int)
     args = parser.parse_args()
 
     # Ids of all keywords can be found in FoS table
@@ -368,7 +371,7 @@ def main():
 
     #print(args.year_flag, args.citation_flag)
 
-    top_authors = rank_authors_keyword(keyword_ids, db, args.year_flag, args.citation_flag,args.frequency_of_publication_flag, args.author_count_per_paper_flag)
+    top_authors = rank_authors_keyword(keyword_ids, db, args.year_flag, args.citation_flag,args.frequency_of_publication_flag, args.author_count_per_paper_flag, args.pioneer_flag)
 
 if __name__ == '__main__':
     main()
