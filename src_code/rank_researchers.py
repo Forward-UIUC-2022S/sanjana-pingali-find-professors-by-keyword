@@ -2,6 +2,9 @@
 import mysql.connector
 import argparse
 import datetime
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression
 
 x = datetime.datetime.now()
 
@@ -176,13 +179,15 @@ def compute_author_keyword_ranks(db,year_flag, author_count_per_paper_flag, pion
         AND Publication_Top_Keywords.publication_id = Publication_Scores.publication_id 
         JOIN Author_count_per_paper ON Author_count_per_paper.publication_id = Publication_Top_Keywords.publication_id
         GROUP BY author_id, Publication_Scores.publication_id, parent_id
-    
     """
    
     cur = db.cursor()
     cur.execute(create_author_ranks_sql, (current_year,))
 
     cur.close()
+
+
+
 
     
 
@@ -191,7 +196,7 @@ def compute_author_keyword_ranks(db,year_flag, author_count_per_paper_flag, pion
 
 
 
-def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of_publication_flag, author_count_per_paper_flag, pioneer_flag):
+def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of_publication_flag, author_count_per_paper_flag, pioneer_flag, upcoming_flag):
     """
     Main function that returns the top ranked authors for some keywords
     Arguments:
@@ -215,17 +220,41 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
     dict_of_authors = {}
     dict_of_author_keywords = {}
 
+    min_year = 0
+
+    if pioneer_flag == 1:
+        cur = db.cursor()
+
+        min_year_keywords = """
+        SELECT MIN(year) as min_year
+        FROM Author_Keyword_Scores
+        where year !=0
+        """
+
+        cur.execute(min_year_keywords)
+
+        min_year = cur.fetchall()[0][0]
+
+        print(min_year)
+        
+        cur.close()
+
     get_author_papers = """
         SELECT TABLE1.author_id, Author.name, TABLE1.title, row_number() over (partition by Author.id order by TABLE1.comp_score desc) as publication_rank, TABLE1.parent_id
         FROM Author JOIN(
-            SELECT author_id, Author_Keyword_Scores.title as title, parent_id, comp_score
+            SELECT author_id, Author_Keyword_Scores.title as title, parent_id, comp_score, year
             FROM Author_Keyword_Scores
+            WHERE year <=
+            CASE %s 
+            WHEN 1 THEN %s + 10
+            WHEN 0 THEN %s + 2000
+            END
             GROUP BY Author_Keyword_Scores.title
         ) AS TABLE1 ON TABLE1.author_id = Author.id
         GROUP BY TABLE1.title
     """
     cur = db.cursor()
-    cur.execute(get_author_papers)
+    cur.execute(get_author_papers, (pioneer_flag, min_year, min_year,))
     author_papers = cur.fetchall()
     for each_record in author_papers:
         if each_record[0] not in dict_of_author_keywords:
@@ -240,8 +269,34 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
                 else:
                     dict_of_authors[each_record[0]].append(each_record[2])
         list_of_authors = tuple(dict_of_authors.keys()) # get all relevant authors
-   
-    #print("here4")
+    
+    dict_author = {}
+    list_of_authors_across = []
+
+    list_of_years = [current_year-4, current_year-3, current_year-2, current_year-1, current_year]
+
+    for each_author in list_of_authors:
+        list_for_each_author = []
+        for year in list_of_years:
+            get_author_activity = """
+            SELECT author_id, SUM(comp_score)
+            FROM Author_Keyword_Scores
+            WHERE author_id = """ + str(each_author)+""" AND year = """ + str(year) + """
+            GROUP BY author_id
+        """
+            cur = db.cursor()
+            cur.execute(get_author_activity)
+            author_year_sum = cur.fetchall()
+            if len(author_year_sum) == 0:
+                 list_for_each_author.append(0)
+            else:
+                list_for_each_author.append(author_year_sum[0][0])
+        list_for_each_author.insert(0, each_author)
+        list_of_authors_across.append(list_for_each_author)
+    
+    dataframe_of_author_across_years = pd.DataFrame(list_of_authors_across, columns = ['author_id', 'current_year-4', 'current_year-3','current_year-2', 'current_year-1', 'current_year'])
+    print(dataframe_of_author_across_years)
+        
 
     dict_of_author_citation = {}
 
@@ -280,30 +335,34 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
         END AS score
         FROM Author_Keyword_Scores
         JOIN Author ON Author.id = Author_Keyword_Scores.author_id JOIN
-                                  (SELECT Author_Keyword_Scores.author_id, COUNT(*) as publication_count, publication_count_5_years, 
+                                (SELECT Author_Keyword_Scores.author_id, COUNT(*) as publication_count, publication_count_5_years,
                                     CASE 
                                         WHEN """ + str(citation_flag) +""" = 1 THEN (SUM(Author_Keyword_Scores.citation)/%s)*SUM(comp_score)
                                         ELSE SUM(comp_score)
                                     END AS int_score
-                                   FROM Author_Keyword_Scores JOIN ( SELECT author_id, COUNT(*) as publication_count_5_years
-                                                                     FROM Author_Keyword_Scores
-                                                                     WHERE %s- year <=5
+                                FROM Author_Keyword_Scores JOIN ( SELECT author_id, COUNT(*) as publication_count_5_years
+                                                                    FROM Author_Keyword_Scores
+                                                                    WHERE %s- year <=5
                                                                     GROUP BY author_id
-                                   ) inner_query ON inner_query.author_id = Author_Keyword_Scores.author_id
-                                   WHERE Author_Keyword_Scores.author_id IN """ + str(list_of_authors) + """
-                                   GROUP BY Author_Keyword_Scores.author_id
-                                  ) as T1 ON T1.author_id = Author_Keyword_Scores.author_id
+                                ) inner_query ON inner_query.author_id = Author_Keyword_Scores.author_id  
+                                WHERE Author_Keyword_Scores.author_id IN """ + str(list_of_authors) + """
+                                GROUP BY Author_Keyword_Scores.author_id
+                                ) as T1 ON T1.author_id = Author_Keyword_Scores.author_id
+        WHERE year <=
+        CASE %s 
+        WHEN 1 THEN %s + 10
+        WHEN 0 THEN %s + 2000
+        END
         GROUP BY Author_Keyword_Scores.author_id
-        ORDER BY 
-        CASE WHEN """+str(pioneer_flag)+"""=1  THEN year
-        END ASC, score DESC
+        ORDER BY score DESC
         LIMIT 15    
     """
     
 
     #cur.execute(get_author_ranks_sql)
-    cur.execute(get_author_ranks_sql, (current_year,current_year,))
+    cur.execute(get_author_ranks_sql, (current_year,current_year,pioneer_flag, min_year,min_year,))
     author_ranks = cur.fetchall()
+
 
 
     res = [{
@@ -356,6 +415,7 @@ def main():
     parser.add_argument('frequency_of_publication_flag', type = int)
     parser.add_argument('author_count_per_paper_flag', type = int)
     parser.add_argument('pioneer_flag', type = int)
+    parser.add_argument('upcoming_flag', type = int)
     args = parser.parse_args()
 
     # Ids of all keywords can be found in FoS table
@@ -371,7 +431,7 @@ def main():
 
     #print(args.year_flag, args.citation_flag)
 
-    top_authors = rank_authors_keyword(keyword_ids, db, args.year_flag, args.citation_flag,args.frequency_of_publication_flag, args.author_count_per_paper_flag, args.pioneer_flag)
+    top_authors = rank_authors_keyword(keyword_ids, db, args.year_flag, args.citation_flag,args.frequency_of_publication_flag, args.author_count_per_paper_flag, args.pioneer_flag, args.upcoming_flag)
 
 if __name__ == '__main__':
     main()
