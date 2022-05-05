@@ -239,10 +239,23 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
         
         cur.close()
 
+    # get_author_papers = """
+    #     SELECT TABLE1.author_id, Author.name, TABLE1.title, row_number() over (partition by Author.id order by TABLE1.comp_score desc) as publication_rank, TABLE1.parent_id
+    #     FROM Author JOIN(
+    #         SELECT author_id, Author_Keyword_Scores.title as title, parent_id, comp_score, year
+    #         FROM Author_Keyword_Scores
+    #         WHERE year <=
+    #         CASE %s 
+    #         WHEN 1 THEN %s + 10
+    #         WHEN 0 THEN %s + 2000
+    #         END
+    #         GROUP BY Author_Keyword_Scores.title
+    #     ) AS TABLE1 ON TABLE1.author_id = Author.id
+    #     GROUP BY TABLE1.title
+    # """
+
     get_author_papers = """
-        SELECT TABLE1.author_id, Author.name, TABLE1.title, row_number() over (partition by Author.id order by TABLE1.comp_score desc) as publication_rank, TABLE1.parent_id
-        FROM Author JOIN(
-            SELECT author_id, Author_Keyword_Scores.title as title, parent_id, comp_score, year
+            SELECT author_id, Author_Keyword_Scores.title as title,row_number() over (partition by author_id order by comp_score desc) as publication_rank, parent_id, year
             FROM Author_Keyword_Scores
             WHERE year <=
             CASE %s 
@@ -250,30 +263,32 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
             WHEN 0 THEN %s + 2000
             END
             GROUP BY Author_Keyword_Scores.title
-        ) AS TABLE1 ON TABLE1.author_id = Author.id
-        GROUP BY TABLE1.title
     """
     cur = db.cursor()
     cur.execute(get_author_papers, (pioneer_flag, min_year, min_year,))
     author_papers = cur.fetchall()
+    print(author_papers[0:10])
     for each_record in author_papers:
         if each_record[0] not in dict_of_author_keywords:
-              dict_of_author_keywords[each_record[0]] = [each_record[4]]
+              dict_of_author_keywords[each_record[0]] = [each_record[3]]
         else:
-                dict_of_author_keywords[each_record[0]].append(each_record[4])
+                dict_of_author_keywords[each_record[0]].append(each_record[3])
     for each_record in author_papers:
         if set(keyword_ids) == set(dict_of_author_keywords[each_record[0]]): #only get the authors that have all parent keywords
-            if each_record[3] <=5: # restrict to top 5 entries
+            if each_record[2] <=5: # restrict to top 5 entries
                 if each_record[0] not in dict_of_authors: # only then add author and its list of titles
-                    dict_of_authors[each_record[0]] = [each_record[2]] 
+                    dict_of_authors[each_record[0]] = [each_record[1]] 
                 else:
-                    dict_of_authors[each_record[0]].append(each_record[2])
+                    dict_of_authors[each_record[0]].append(each_record[1])
         list_of_authors = tuple(dict_of_authors.keys()) # get all relevant authors
     
     dict_author = {}
     list_of_authors_across = []
 
     list_of_years = [current_year-4, current_year-3, current_year-2, current_year-1, current_year]
+    x_train = []
+    y_train = []
+    x_test = []
 
     for each_author in list_of_authors:
         list_for_each_author = []
@@ -290,14 +305,29 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
             if len(author_year_sum) == 0:
                  list_for_each_author.append(0)
             else:
-                list_for_each_author.append(author_year_sum[0][0])
+                list_for_each_author.append(author_year_sum[0][1])
+        
         list_for_each_author.insert(0, each_author)
+        x_train.append(list_for_each_author[1:3])
+        x_test.append(list_for_each_author[1:4])
+        y_train.append(list_for_each_author[4])
         list_of_authors_across.append(list_for_each_author)
+
+    x = np.array(x_train)
+    y = np.array(y_train)
+
+    model = LinearRegression().fit(x, y)
+    r_sq = model.score(x, y)
+    print(r_sq)
+
+    # y_pred = model.predict(np.array(x_test))
+
+    # y_pred_graph = model.intercept_ + model.coef_ * x
     
     dataframe_of_author_across_years = pd.DataFrame(list_of_authors_across, columns = ['author_id', 'current_year-4', 'current_year-3','current_year-2', 'current_year-1', 'current_year'])
     print(dataframe_of_author_across_years)
-        
 
+   
     dict_of_author_citation = {}
 
     get_author_citations = """
@@ -353,6 +383,10 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
         WHEN 1 THEN %s + 10
         WHEN 0 THEN %s + 2000
         END
+        AND year !=
+        CASE %s 
+        WHEN 1 THEN 0
+        END
         GROUP BY Author_Keyword_Scores.author_id
         ORDER BY score DESC
         LIMIT 15    
@@ -360,7 +394,7 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
     
 
     #cur.execute(get_author_ranks_sql)
-    cur.execute(get_author_ranks_sql, (current_year,current_year,pioneer_flag, min_year,min_year,))
+    cur.execute(get_author_ranks_sql, (current_year,current_year,pioneer_flag, min_year,min_year,pioneer_flag,))
     author_ranks = cur.fetchall()
 
 
