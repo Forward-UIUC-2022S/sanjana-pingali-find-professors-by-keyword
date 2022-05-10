@@ -25,7 +25,7 @@ sanjana-pingali-find-professors-by-keyword/
 &nbsp;   &nbsp;   &nbsp;├── rank_researchers.py    # main file that contains code for ranking </br> 
 &nbsp;   &nbsp;   &nbsp;└── utility.py             # helper file to help ranking  </br>  
 ├── images    &nbsp;   &nbsp;                                  # images for the README </br>  
-├── requirements.txt
+├── requirements.txt </br>
 └── README.md </br>
 
 Functional Design
