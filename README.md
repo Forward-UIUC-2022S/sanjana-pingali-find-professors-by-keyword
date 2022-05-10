@@ -30,44 +30,40 @@ sanjana-pingali-find-professors-by-keyword/
 ├── requirements.txt </br>
 └── README.md </br>
 
-Functional Design
------------------------------
-
 Algorithmic Design
 -----------------------------
 The goal of this module is to rank researchers given a set of keywords.
 
-Obtain a set of keywords from the user and an input indication of which criteria we want to rank based on. The criteria ranking are based on the years of their publications, based on how active an author is in a field in more recent years and the amount of citations of the author.
+Ranking based on Score: </br>
 
-1. The idea of ranking based on year of publication accounts for the year the paper was published in. If the paper was published more recently it should be more relevant and it is given a higher keyword similarity score compared to an older paper. This is done by weighting the score betweeen a keyword and paper with a higher weight for more recent years. This is done by using a geometric sequence (with constant as 0.9) formula to reduce the similarity value since the constant is below 1 and the exponent is the different between current year and year of publication.
+Obtain a set of keywords from the user and an input indication of which criteria we want to rank based on. If the ranking criteria is based on score,  the criteria for a score ranking can be based on the years of their publications, the amount of citations of the author based on how active an author is in a field in more recent years and how many co-authors tend to contibute to this authors papers.
 
-Here this similarity is represented by s(in) where i is the paper being considered and n is the input keyword being considered. m iterates through 10 similar keywords for a keyword input.
+1. The idea of ranking based on year of publication accounts for the year the paper was published in. If the paper was published more recently it should be more relevant and it is given a higher paper-keyword similarity score compared to an older paper. This is done by weighting the score betweeen a keyword and paper with a higher weight for more recent years. This is done by using a geometric sequence (with constant as 0.9) formula to reduce the similarity value since the constant is below 1 and the exponent is the different between current year and year of publication.
 
-![alt text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/equation_for_year_criteria.JPG)
+![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/Capture.JPG)
+
 
 This will affect the similarity value between papers and keywords so that papers that are too old by a specific author linked to these words will not be given as much importance.
 
-2. The next criteria that is used for ranking is the amount of citations for that particular author. This ranking is based on the idea using a weight that is a result of adding up all citations across all papers of an author and dividing by the largest citations for a single author. This weight will be lowered the lower citations am author has to other similar authors related to these keywords. Here p refers to total published papers of an author and q refers to the specicifc author. The compscore is the score between each paper and author. This is added across all authors.
+2. The next criteria that is used for ranking is the amount of citations for that particular author. The paper-keyword similarity score that is generated is reduced for authors with lower number of citations compared to others with authors related to these similar keywords. This is done by adding up the sum of citations of a certain author across all papers and dividing it by the largest number of citations for a single author and then scaling the paper-keyword similarity score according to this value.
 
-![alt text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/equation_for_citations.JPG)
+![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/Capture1.JPG)
 
-If we do not choose to consider citations as a factor that contributes to this ranking we add across all authors without adding weights to this ranked value.
+3. The third metric that can contribute to the ranking of a researcher based on their score is basing it on how active a researcher has been in a field. A researchers activity in a field can be computed by finding the sum of total papers published by the researcher in the past five years divided by the total number of papers the researcher had published. This then gives a weightage of the relative publications of a researcher in more recent years as compared to the rest of their career. This weight is then multiplied by the sum of the paper-keyword rankings for a particular author. 
 
-![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/without_citations.JPG)
+![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/freq_of_words.JPG)
 
-3. The final rank metric uses the previous rc_q rank obtained which was updated based on whether we wanted to consider citations and this ranking criteria adds a weight based on how active a researcher has been in a field in the past 5 years in terms of publishing papers as compared to their whole career. If they publish more papers recently then there will be a higher proportion value.
+4. The fourth and final metric when it comes to ranking an author based on score is based on the number of authors that contribute to a paper. This metric scales the paper-keyword similarity score of a paper based on how much eah author has contributed to that paper. If more authors contibute that paper paper-keyword similiarity score goes down. This is done by dividing the score by the total number of authors that have contributed to it.
 
-![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/rank_based_on_activity.JPG)
+![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/no_of_authors.JPG)
 
-After these criteria we get a final rank value for the authors given a keyword.
 
-Pioneer Metric:
-Pioneer: 
-- Keyword input : find 10 similar
-- Then find similarity score of a paper and keyword
-- The earliest year an input keyword is coined is considered
-- All papers are obtained within 10 years of that keyword coined
-- Only obtain and rank authors that lie in this year range
+After these criteria we get a final rank value for the authors given a keyword based on score.
 
-References
+Ranking based on Initial Contributions to the field: </br>
+
+This module is separate of score and depends on the ranking of a researcher in a field if they had contributed a large amount in the beginning when the field was first recognized. This module does this by finding out the year one of the input keywords was first coined or the first time a paper was based on an input keyword and finds only papers that were published earlier than 10 years after that. These researchers are then ranked according to descending order of score and researchers that contributed the most in that time period should be ranked higher.
+
+Future Work
 -----------------------------
+I had also started work on another module which is ranking professors in a field based on the criteria of whether they were upcoming and publishing more recent years. I was aiming at using linear regression to predict the trend of their publications in the last 5 years and extrapolate these datapoints to predict for the next few years too. This module unfortunatley, was not able to be completed.
