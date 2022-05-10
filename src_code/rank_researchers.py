@@ -186,7 +186,7 @@ def compute_author_keyword_ranks(db,year_flag, author_count_per_paper_flag, pion
 
 
 
-def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of_publication_flag, author_count_per_paper_flag, pioneer_flag, upcoming_flag):
+def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of_publication_flag, author_count_per_paper_flag, pioneer_flag):
     """
     Main function that returns the top ranked authors for some keywords
     Arguments:
@@ -229,7 +229,7 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
 
         min_year = cur.fetchall()[0][0]
 
-        print(min_year)
+        #print(min_year)
         
         cur.close()
 
@@ -260,46 +260,6 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
                 else:
                     dict_of_authors[each_record[0]].append(each_record[1])
         list_of_authors = tuple(dict_of_authors.keys()) # get all relevant authors
-    
-    # list_of_authors_across = []
-    # year = 2020
-    # list_of_years = [year-4, year-3, year-2, year-1, year]
-    # x_train = []
-    # y_train = []
-
-    # for each_author in list_of_authors:
-    #     list_for_each_author = []
-    #     for year in list_of_years:
-    #         get_author_activity = """
-    #         SELECT author_id, SUM(comp_score)
-    #         FROM Author_Keyword_Scores
-    #         WHERE author_id = """ + str(each_author)+""" AND year = """ + str(year) + """
-    #         GROUP BY author_id
-    #     """
-    #     # populate score for each author
-    #         cur = db.cursor()
-    #         cur.execute(get_author_activity)
-    #         author_year_sum = cur.fetchall()
-    #         if len(author_year_sum) == 0:
-    #              list_for_each_author.append(0)
-    #         else:
-    #             list_for_each_author.append(author_year_sum[0][1])
-        
-    #     y_train = list_for_each_author
-    #     x_train = (list_of_years)
-       
-    #     print("xtrain", x_train)
-    #     print("ytrain", y_train)
-
-    #     model = interpolate.interp1d(np.array(x_train), np.array(y_train), fill_value = "extrapolate")
-    #     list_for_each_author.insert(0, each_author)
-      
-    #     list_for_each_author.append(np.gradient(np.array([model(year+1),model(year+2) ]))[0])
-    #     list_of_authors_across.append(list_for_each_author)
-
-    
-    # dataframe_of_author_across_years = pd.DataFrame(list_of_authors_across, columns = ['author_id', 'current_year-4', 'current_year-3','current_year-2', 'current_year-1', 'current_year', 'gradient_prediction'])
-    # print(dataframe_of_author_across_years)
 
    
     dict_of_author_citation = {}
@@ -317,10 +277,6 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
          dict_of_author_citation[each_author_citation[0]] = each_author_citation[1]
 
     max_value = dict_of_author_citation[max(dict_of_author_citation, key=dict_of_author_citation.get)] # get key of highest value to normalize
-
-    #print("here3")
-
-    print(max_value)
 
 
     get_author_ranks_sql = """
@@ -402,8 +358,8 @@ def main():
     db = mysql.connector.connect(
     host='localhost',
     user="root",
-    password= <password>,
-    database= <database>
+    password=<password>,
+    database=<database>
     )
     
     cur = db.cursor()
@@ -417,7 +373,7 @@ def main():
     # parser.add_argument('author_count_per_paper_flag', type = int)
     parser.add_argument('score_flag', type = int)
     parser.add_argument('pioneer_flag', type = int)
-    parser.add_argument('upcoming_flag', type = int)
+    #parser.add_argument('upcoming_flag', type = int)
     args = parser.parse_args()
 
     year_flag =0
@@ -441,7 +397,7 @@ def main():
     result = cur.fetchall()
     keyword_ids = tuple(row_tuple[0] for row_tuple in result)
 
-    top_authors = rank_authors_keyword(keyword_ids, db, year_flag,citation_flag, frequency_of_publication_flag, author_count_per_paper_flag, args.pioneer_flag, args.upcoming_flag)
+    top_authors = rank_authors_keyword(keyword_ids, db, year_flag,citation_flag, frequency_of_publication_flag, author_count_per_paper_flag, args.pioneer_flag)
 
 if __name__ == '__main__':
     main()
