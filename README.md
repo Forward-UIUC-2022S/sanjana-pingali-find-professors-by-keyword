@@ -13,11 +13,12 @@ Demo
 Setup
 -----------------------------
 sanjana-pingali-find-professors-by-keyword/
-├── src_code                      # main bulk of the code for the module
-     ├── rank_researchers.py      # main file that contains code for ranking
-     └── utility.py               # helper file to help ranking
-├── images                        # images for the README
-└── README.md
+</br>
+├── src_code </br>                     # main bulk of the code for the module
+     ├── rank_researchers.py   </br>   # main file that contains code for ranking
+     └── utility.py         </br>      # helper file to help ranking
+├── images        </br>                # images for the README
+└── README.md </br>
 
 Project Structure
 -----------------------------
