@@ -54,6 +54,11 @@ This will affect the similarity value between papers and keywords so that papers
 
 3. The third metric that can contribute to the ranking of a researcher based on their score is basing it on how active a researcher has been in a field. A researchers activity in a field can be computed by finding the sum of total papers published by the researcher in the past five years divided by the total number of papers the researcher had published. This then gives a weightage of the relative publications of a researcher in more recent years as compared to the rest of their career. This weight is then multiplied by the sum of the paper-keyword rankings for a particular author. 
 
+![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/freq_of_words.JPG)
+
+4. The fourth and final metric when it comes to ranking an author based on score is based on the number of authors that contribute to a paper. This metric scales the paper-keyword similarity score of a paper based on how much eah author has contributed to that paper. If more authors contibute that paper paper-keyword similiarity score goes down. This is done by dividing the score by the total number of authors that have contributed to it.
+
+
 
 
 After these criteria we get a final rank value for the authors given a keyword based on score.
