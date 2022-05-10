@@ -12,6 +12,8 @@ Demo
 
 Setup
 -----------------------------
+Project Structure
+-----------------------------
 sanjana-pingali-find-professors-by-keyword/
 </br>
 ├── src_code    &nbsp;   &nbsp;                                  # main bulk of the code for the module </br> 
@@ -19,9 +21,6 @@ sanjana-pingali-find-professors-by-keyword/
 &nbsp;   &nbsp;   &nbsp;└── utility.py             # helper file to help ranking  </br>  
 ├── images    &nbsp;   &nbsp;                                  # images for the README </br>  
 └── README.md </br>
-
-Project Structure
------------------------------
 
 Functional Design
 -----------------------------
