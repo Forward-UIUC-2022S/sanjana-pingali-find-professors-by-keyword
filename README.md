@@ -15,8 +15,8 @@ Setup
 sanjana-pingali-find-professors-by-keyword/
 </br>
 ├── src_code                    # main bulk of the code for the module </br>  
-____ ├── rank_researchers.py    # main file that contains code for ranking </br> 
-____└── utility.py             # helper file to help ranking  </br>  
+<pre>  </pre>├── rank_researchers.py    # main file that contains code for ranking </br> 
+<pre>  </pre>└── utility.py             # helper file to help ranking  </br>  
 ├── images                      # images for the README </br>  
 └── README.md </br>
 
