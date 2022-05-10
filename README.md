@@ -12,9 +12,23 @@ Demo
 
 Setup
 -----------------------------
-
+- Clone the repository
+- do 'pip install -r requirements'
+- cd into the src_code directory
+- run
+<pre> python [keywords] [score rank] [pioneer rank] [upcoming researcher rank] </pre>
+- If a ranking based on score is chosen then four more arguments must be entered:
+<pre> [year factor] [citation] [frequency of publication] [author count] </pre>
 Project Structure
 -----------------------------
+sanjana-pingali-find-professors-by-keyword/
+</br>
+├── src_code    &nbsp;   &nbsp;                                  # main bulk of the code for the module </br> 
+&nbsp;   &nbsp;   &nbsp;├── rank_researchers.py    # main file that contains code for ranking </br> 
+&nbsp;   &nbsp;   &nbsp;└── utility.py             # helper file to help ranking  </br>  
+├── images    &nbsp;   &nbsp;                                  # images for the README </br>  
+├── requirements.txt </br>
+└── README.md </br>
 
 Functional Design
 -----------------------------
@@ -46,6 +60,14 @@ If we do not choose to consider citations as a factor that contributes to this r
 ![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/rank_based_on_activity.JPG)
 
 After these criteria we get a final rank value for the authors given a keyword.
+
+Pioneer Metric:
+Pioneer: 
+- Keyword input : find 10 similar
+- Then find similarity score of a paper and keyword
+- The earliest year an input keyword is coined is considered
+- All papers are obtained within 10 years of that keyword coined
+- Only obtain and rank authors that lie in this year range
 
 References
 -----------------------------
