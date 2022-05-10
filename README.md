@@ -16,7 +16,7 @@ Setup
 - do 'pip install -r requirements'
 - cd into the src_code directory
 - run
-<pre> python <keywords> <score rank> <pioneer rank> <upcoming researcher rank> </pre>
+<pre> python keywords score rank pioneer rank upcoming researcher rank </pre>
 Project Structure
 -----------------------------
 sanjana-pingali-find-professors-by-keyword/
