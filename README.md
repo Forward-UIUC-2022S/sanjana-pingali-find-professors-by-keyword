@@ -12,6 +12,11 @@ Demo
 
 Setup
 -----------------------------
+- Clone the repository
+- do 'pip install -r requirements'
+- cd into the src_code directory
+- run
+<pre> python <keywords> <score rank> <pioneer rank> <upcoming researcher rank> </pre>
 Project Structure
 -----------------------------
 sanjana-pingali-find-professors-by-keyword/
@@ -20,6 +25,7 @@ sanjana-pingali-find-professors-by-keyword/
 &nbsp;   &nbsp;   &nbsp;├── rank_researchers.py    # main file that contains code for ranking </br> 
 &nbsp;   &nbsp;   &nbsp;└── utility.py             # helper file to help ranking  </br>  
 ├── images    &nbsp;   &nbsp;                                  # images for the README </br>  
+├── requirements.txt
 └── README.md </br>
 
 Functional Design
