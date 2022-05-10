@@ -63,11 +63,10 @@ This will affect the similarity value between papers and keywords so that papers
 
 After these criteria we get a final rank value for the authors given a keyword based on score.
 
-Pioneer Metric:
-Pioneer: 
-- Keyword input : find 10 similar
-- Then find similarity score of a paper and keyword
-- The earliest year an input keyword is coined is considered
-- All papers are obtained within 10 years of that keyword coined
-- Only obtain and rank authors that lie in this year range
+Ranking based on Initial Contributions to the field: </br>
 
+This module is separate of score and depends on the ranking of a researcher in a field if they had contributed a large amount in the beginning when the field was first recognized. This module does this by finding out the year one of the input keywords was first coined or the first time a paper was based on an input keyword and finds only papers that were published earlier than 10 years after that. These researchers are then ranked according to descending order of score and researchers that contributed the most in that time period should be ranked higher.
+
+Future Work
+-----------------------------
+I had also started work on another module which is ranking professors in a field based on the criteria of whether they were upcoming and publishing more recent years. I was aiming at using linear regression to predict the trend of their publications in the last 5 years and extrapolate these datapoints to predict for the next few years too.
