@@ -69,4 +69,4 @@ This module is separate of score and depends on the ranking of a researcher in a
 
 Future Work
 -----------------------------
-I had also started work on another module which is ranking professors in a field based on the criteria of whether they were upcoming and publishing more recent years. I was aiming at using linear regression to predict the trend of their publications in the last 5 years and extrapolate these datapoints to predict for the next few years too.
+I had also started work on another module which is ranking professors in a field based on the criteria of whether they were upcoming and publishing more recent years. I was aiming at using linear regression to predict the trend of their publications in the last 5 years and extrapolate these datapoints to predict for the next few years too. This module unfortunatley, was not able to be completed.
