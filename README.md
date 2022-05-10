@@ -16,7 +16,7 @@ Setup
 - do 'pip install -r requirements'
 - cd into the src_code directory
 - run
-<pre> python [keywords] [score rank] [pioneer rank] [upcoming researcher rank] </pre>
+<pre> python [keywords] [score rank] [pioneer rank] </pre>
 - If a ranking based on score is chosen then four more arguments must be entered:
 <pre> [year factor] [citation] [frequency of publication] [author count] </pre>
 Project Structure
