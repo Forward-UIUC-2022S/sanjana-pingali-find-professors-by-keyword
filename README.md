@@ -30,9 +30,6 @@ sanjana-pingali-find-professors-by-keyword/
 ├── requirements.txt </br>
 └── README.md </br>
 
-Functional Design
------------------------------
-
 Algorithmic Design
 -----------------------------
 The goal of this module is to rank researchers given a set of keywords.
