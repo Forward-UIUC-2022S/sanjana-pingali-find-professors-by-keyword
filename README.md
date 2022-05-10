@@ -50,7 +50,7 @@ This will affect the similarity value between papers and keywords so that papers
 
 2. The next criteria that is used for ranking is the amount of citations for that particular author. The paper-keyword similarity score that is generated is reduced for authors with lower number of citations compared to others with authors related to these similar keywords. This is done by adding up the sum of citations of a certain author across all papers and dividing it by the largest number of citations for a single author and then scaling the paper-keyword similarity score according to this value.
 
-
+![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/Capture1.JPG)
 
 3. 
 
