@@ -47,5 +47,13 @@ If we do not choose to consider citations as a factor that contributes to this r
 
 After these criteria we get a final rank value for the authors given a keyword.
 
+Pioneer Metric:
+Pioneer: 
+- Keyword input : find 10 similar
+- Then find similarity score of a paper and keyword
+- The earliest year an input keyword is coined is considered
+- All papers are obtained within 10 years of that keyword coined
+- Only obtain and rank authors that lie in this year range
+
 References
 -----------------------------
