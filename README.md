@@ -58,7 +58,7 @@ This will affect the similarity value between papers and keywords so that papers
 
 4. The fourth and final metric when it comes to ranking an author based on score is based on the number of authors that contribute to a paper. This metric scales the paper-keyword similarity score of a paper based on how much eah author has contributed to that paper. If more authors contibute that paper paper-keyword similiarity score goes down. This is done by dividing the score by the total number of authors that have contributed to it.
 
-
+![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/no_of_authors.JPG)
 
 
 After these criteria we get a final rank value for the authors given a keyword based on score.
