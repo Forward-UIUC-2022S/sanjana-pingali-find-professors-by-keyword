@@ -9,7 +9,7 @@ The first metric is ranking professors based on whether they are pioneers in a f
 
 Demo
 -----------------------------
-[![Watch the video](https://i.imgur.com/vKb2F1B.png)](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/video3605113157.mp4)
+[![Watch the video](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/video3605113157.mp4)
 
 Setup
 -----------------------------
