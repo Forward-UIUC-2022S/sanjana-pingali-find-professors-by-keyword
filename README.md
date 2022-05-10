@@ -65,5 +65,3 @@ Pioneer:
 - All papers are obtained within 10 years of that keyword coined
 - Only obtain and rank authors that lie in this year range
 
-References
------------------------------
