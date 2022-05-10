@@ -1,4 +1,17 @@
 # find-professors-by-keyword
+-----------------------------
+Demo
+-----------------------------
+
+Setup
+-----------------------------
+
+Project Structure
+-----------------------------
+
+Functional Design
+-----------------------------
+
 Algorithmic Design
 -----------------------------
 The goal of this module is to rank researchers given a set of keywords.
@@ -26,3 +39,6 @@ If we do not choose to consider citations as a factor that contributes to this r
 ![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/rank_based_on_activity.JPG)
 
 After these criteria we get a final rank value for the authors given a keyword.
+
+References
+-----------------------------
