@@ -2,13 +2,14 @@
 -----------------------------
 Overview
 -----------------------------
-The goal of this module is to be able to rank professors whose papers appear in the MAG dataset based on their relation to keywords in a field. keywords are given as an input and this module ranks these professors based on three main categories. 
+The goal of this module is to be able to rank professors whose papers appear in the MAG dataset based on their relation to keywords in a field. keywords are given as an input and this module ranks these professors based on two main categories. 
 
-The first metric is ranking professors based on whether they are pioneers in a field, the second ranks professors that are upcoming in a field and making more recent contributions higher and finally, the last metric takes in different features that affect the ranking of professors to related keywords by impacting the score of the professors. The factors in the last metric include a ranking based on year of citations of the professors, based in citations, based on frequency of publication and based on whether there were more co-authors to papers they published (as opposed to them being the sole publisher).
+The first metric is ranking professors based on whether they are pioneers in a field the second metric takes in different features that affect the ranking of professors to related keywords by impacting the score of the professors. The factors in the last metric include a ranking based on year of citations of the professors, based in citations, based on frequency of publication and based on whether there were more co-authors to papers they published (as opposed to them being the sole publisher).
 <br/>
 
 Demo
 -----------------------------
+[![Watch the video](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/video3605113157.mp4)
 
 Setup
 -----------------------------
@@ -16,7 +17,7 @@ Setup
 - do 'pip install -r requirements'
 - cd into the src_code directory
 - run
-<pre> python [keywords] [score rank] [pioneer rank] [upcoming researcher rank] </pre>
+<pre> python [keywords] [score rank] [pioneer rank] </pre>
 - If a ranking based on score is chosen then four more arguments must be entered:
 <pre> [year factor] [citation] [frequency of publication] [author count] </pre>
 Project Structure
