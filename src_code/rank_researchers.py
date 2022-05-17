@@ -184,56 +184,25 @@ def compute_author_keyword_ranks(db,year_flag, author_count_per_paper_flag, pion
 
     cur.close()
 
-
-
-def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of_publication_flag, author_count_per_paper_flag, pioneer_flag):
+def get_authors(db, pioneer_flag, min_year, keyword_ids):
     """
-    Main function that returns the top ranked authors for some keywords
+    Stores the authors and the papers each author published as a dictionary,
+    the main keywords inputted that are associated with each author and finally,
+    the list of authors where keywords are related to all the input keywords.
     Arguments:
-    - keyword_ids: list of keyword ids by which we must rank
-    - cur: db cursor
-    Returns: list of python dicts each representing an author.
-    Each dict has keys 'name', 'id', and 'score' of author. During ranking
-    each keyword is weighted separately and equally.
+    - db: The current database
+    - pioneer_flag: flag to determine whether to rank according to pioneers in a field
+    - min_year : the earliest year one of the keyword input was related to a paper
+    - keyword_ids: a list of the ids of the keywords that were input
+    Returns: 
+    -list_of_authors:the list of authors where keywords are related to all the input keywords
+    - dict_of_authors:  a dictionary of the authors and the papers each author published
+    -dict_of_author_keywords: a dictionary of the main keywords inputted that are associated with each author 
+
     """
-
-    
-    # Store top similar keywords
-    store_keywords(db, keyword_ids)
-
-    #obtains the total author count for each publication 
-    author_count_per_paper(db)
-
-    # Compute scores between each publication and input keyword
-    compute_author_keyword_ranks(db,year_flag, author_count_per_paper_flag, pioneer_flag)
-
-
-    # Aggregate scores for each author
     dict_of_authors = {}
     dict_of_author_keywords = {}
-
-    min_year = 0
-
-    if pioneer_flag == 1:
-        cur = db.cursor()
-
-        min_year_keywords = """
-        SELECT MIN(T1.year) as min_year
-        FROM (SELECT parent_id,year
-        FROM Author_Keyword_Scores
-        where year !=0 AND parent_id = kw_id
-        ) as T1
-        """
-
-        cur.execute(min_year_keywords)
-
-        min_year = cur.fetchall()[0][0]
-
-        #print(min_year)
-        
-        cur.close()
-
-
+ 
     get_author_papers = """
             SELECT author_id, Author_Keyword_Scores.title as title,row_number() over (partition by author_id order by comp_score desc) as publication_rank, parent_id, year
             FROM Author_Keyword_Scores
@@ -260,8 +229,19 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
                 else:
                     dict_of_authors[each_record[0]].append(each_record[1])
         list_of_authors = tuple(dict_of_authors.keys()) # get all relevant authors
+    
+    return list_of_authors, dict_of_authors, dict_of_author_keywords
 
-   
+def get_author_citations(db):
+    """
+   To obtain maximum citations of any author that is related to all input keywords
+    Arguments:
+    - db: The current database
+    Returns: 
+    -dict_of_author_citation: total sum of citations of each author
+    -max_value: get highest no of citations to normalize
+
+    """
     dict_of_author_citation = {}
 
     get_author_citations = """
@@ -277,6 +257,53 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
          dict_of_author_citation[each_author_citation[0]] = each_author_citation[1]
 
     max_value = dict_of_author_citation[max(dict_of_author_citation, key=dict_of_author_citation.get)] # get key of highest value to normalize
+
+    return dict_of_author_citation, max_value
+
+
+def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of_publication_flag, author_count_per_paper_flag, pioneer_flag):
+    """
+    Main function that returns the top ranked authors for some keywords
+    Arguments:
+    - keyword_ids: list of keyword ids by which we must rank
+    - cur: db cursor
+    Returns: list of python dicts each representing an author.
+    Each dict has keys 'name', 'id', and 'score' of author. During ranking
+    each keyword is weighted separately and equally.
+    """
+
+    
+    # Store top similar keywords
+    store_keywords(db, keyword_ids)
+
+    #obtains the total author count for each publication 
+    author_count_per_paper(db)
+
+    # Compute scores between each publication and input keyword
+    compute_author_keyword_ranks(db,year_flag, author_count_per_paper_flag, pioneer_flag)
+
+    min_year = 0
+
+    if pioneer_flag == 1:
+        cur = db.cursor()
+
+        min_year_keywords = """
+        SELECT MIN(T1.year) as min_year
+        FROM (SELECT parent_id,year
+        FROM Author_Keyword_Scores
+        where year !=0 AND parent_id = kw_id
+        ) as T1
+        """
+
+        cur.execute(min_year_keywords)
+
+        min_year = cur.fetchall()[0][0]
+        
+        cur.close()
+
+    list_of_authors, dict_of_authors, dict_of_author_keywords = get_authors(db, pioneer_flag, min_year, keyword_ids)
+
+    dict_of_author_citation, max_value = get_author_citations(db)
 
 
     get_author_ranks_sql = """
@@ -314,10 +341,8 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
         ORDER BY score DESC
         LIMIT 15    
     """
-    
-
-    #cur.execute(get_author_ranks_sql)
-    cur.execute(get_author_ranks_sql, (current_year,current_year,pioneer_flag, min_year,min_year,pioneer_flag,))
+    cur = db.cursor()
+    cur.execute(get_author_ranks_sql, (max_value,current_year,pioneer_flag, min_year,min_year,pioneer_flag,))
     author_ranks = cur.fetchall()
 
 
@@ -367,13 +392,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('keywords', type=str, nargs='+',
                         help='keywords in search query. Separate with spaces')
-    # parser.add_argument('year_flag', type = int)
-    # parser.add_argument('citation_flag', type = int)
-    # parser.add_argument('frequency_of_publication_flag', type = int)
-    # parser.add_argument('author_count_per_paper_flag', type = int)
     parser.add_argument('score_flag', type = int)
     parser.add_argument('pioneer_flag', type = int)
-    #parser.add_argument('upcoming_flag', type = int)
     args = parser.parse_args()
 
     year_flag =0
@@ -393,7 +413,6 @@ def main():
     get_ids_sql =  """SELECT id FROM FoS where FoS_name IN """ + fields_in_sql + """;"""
 
     cur.execute(get_ids_sql, args.keywords)
-    #print("here")
     result = cur.fetchall()
     keyword_ids = tuple(row_tuple[0] for row_tuple in result)
 
