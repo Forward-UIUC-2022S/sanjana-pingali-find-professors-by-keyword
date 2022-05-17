@@ -4,7 +4,7 @@ Overview
 -----------------------------
 The goal of this module is to be able to rank professors whose papers appear in the MAG dataset based on their relation to keywords in a field. keywords are given as an input and this module ranks these professors based on two main categories. 
 
-The first metric is ranking professors based on whether they are pioneers in a field the second metric takes in different features that affect the ranking of professors to related keywords by impacting the score of the professors. The factors in the last metric include a ranking based on year of citations of the professors, based in citations, based on frequency of publication and based on whether there were more co-authors to papers they published (as opposed to them being the sole publisher).
+The first metric is ranking professors based on whether they are pioneers in a field. The second metric, on the other hand, takes in different features that affect the ranking of professors to related keywords by impacting the score of the professors. These factors in the last metric include a ranking based on year of publication of the papers of the professors, based on the total number of citations of the professor, based on frequency of publications of the professor especially in more recent years and finally, based on whether there were more co-authors to papers they published (as opposed to them being the sole publisher).
 <br/>
 
 Demo
@@ -30,6 +30,17 @@ sanjana-pingali-find-professors-by-keyword/
 ├── images    &nbsp;   &nbsp;                                  # images for the README </br>  
 ├── requirements.txt </br>
 └── README.md </br>
+
+Functional Design
+-----------------------------
+store_keywords: For each input keyword this function generates 10 similar keywords to it.  </br>
+author_count_per_paper: Stores number of authors for each paper  </br>
+compute_author_keyword_ranks: finds the score of how much each keyword matches a given paper.  </br>
+get_authors: Stores information related to authors such as the keywords associated with each, the papers associated with each and also gets list of viable authors for consideration.  </br>
+get_author_citations: obtains citation count for each author and also maximum citations for any author relating to all parent keywords.  </br>
+rank_authors_keyword:function that ranks the authors.  </br>
+
+
 
 Algorithmic Design
 -----------------------------
