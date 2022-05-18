@@ -64,7 +64,7 @@ This will affect the similarity value between papers and keywords so that papers
 
 2. The next criteria that is used for ranking is the amount of citations for that particular author. The paper-keyword similarity score that is generated is reduced for authors with lower number of citations compared to others with authors related to these similar keywords. This is done by adding up the sum of citations of a certain author across all papers and dividing it by the largest number of citations for a single author and then scaling the paper-keyword similarity score according to this value.
 
-![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/Capture1.JPG)
+![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/cit_.JPG)
 
 3. The third metric that can contribute to the ranking of a researcher based on their score is basing it on how active a researcher has been in a field. A researchers activity in a field can be computed by finding the sum of total papers published by the researcher in the past five years divided by the total number of papers the researcher had published. This then gives a weightage of the relative publications of a researcher in more recent years as compared to the rest of their career. This weight is then multiplied by the sum of the paper-keyword rankings for a particular author. 
 
