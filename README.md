@@ -9,6 +9,7 @@ The first metric is ranking professors based on whether they are pioneers in a f
 
 Demo
 -----------------------------
+![alt_text](https://drive.google.com/file/d/12FNkGFjnM0cVuGDtWzCFoMuHTWVaC_BO/view?usp=sharing)
 
 Setup
 -----------------------------
