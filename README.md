@@ -49,7 +49,6 @@ The goal of this module is to rank researchers given a set of keywords.
 2. All keywords (ak_j) are represented as ak_1... ak_x
 3. Papers are represented as p1...py.
 4. The similarity score between a paper and keyword is s_j,y.
-5. All authors are represented by a1...az.
 
 Ranking based on Score: </br>
 
