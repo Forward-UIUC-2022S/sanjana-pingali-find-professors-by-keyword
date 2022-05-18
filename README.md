@@ -84,3 +84,5 @@ This module is separate of score and depends on the ranking of a researcher in a
 Issues and Future Work
 -----------------------------
 I had also started work on another module which is ranking professors in a field based on the criteria of whether they were upcoming and publishing more recent years. I was aiming at using linear regression to predict the trend of their publications in the last 5 years and extrapolate these datapoints to predict for the next few years too. This module unfortunatley, was not able to be completed as I was not able to incorporate the predictions with the authors in the SQL database.
+
+In addition, running this module takes a bit of time whihc could be improved by converting dictionaries into SQL queries.
