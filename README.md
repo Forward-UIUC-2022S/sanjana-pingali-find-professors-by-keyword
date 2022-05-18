@@ -45,10 +45,15 @@ rank_authors_keyword:function that ranks the authors.  </br>
 Algorithmic Design
 -----------------------------
 The goal of this module is to rank researchers given a set of keywords.
+1. The keywords (k_i) we recieve from the user are k1...kn.
+2. All keywords (ak_j) are represented as ak_1... ak_x
+3. Papers are represented as p1...py.
+4. The similarity score between a paper and keyword is s_j,y.
 
 Ranking based on Score: </br>
 
 Obtain a set of keywords from the user and an input indication of which criteria we want to rank based on. If the ranking criteria is based on score,  the criteria for a score ranking can be based on the years of their publications, the amount of citations of the author based on how active an author is in a field in more recent years and how many co-authors tend to contibute to this authors papers.
+
 
 1. The idea of ranking based on year of publication accounts for the year the paper was published in. If the paper was published more recently it should be more relevant and it is given a higher paper-keyword similarity score compared to an older paper. This is done by weighting the score betweeen a keyword and paper with a higher weight for more recent years. This is done by using a geometric sequence (with constant as 0.9) formula to reduce the similarity value since the constant is below 1 and the exponent is the different between current year and year of publication.
 
