@@ -57,7 +57,7 @@ Obtain a set of keywords from the user and an input indication of which criteria
 
 1. The idea of ranking based on year of publication accounts for the year the paper was published in. If the paper was published more recently it should be more relevant and it is given a higher paper-keyword similarity score compared to an older paper. This is done by weighting the score betweeen a keyword and paper with a higher weight for more recent years. This is done by using a geometric sequence (with constant as 0.9) formula to reduce the similarity value since the constant is below 1 and the exponent is the different between current year and year of publication.
 
-![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/Capture.JPG)
+![alt_text](https://github.com/Forward-UIUC-2022S/sanjana-pingali-find-professors-by-keyword/blob/main/images/year_.JPG)
 
 
 This will affect the similarity value between papers and keywords so that papers that are too old by a specific author linked to these words will not be given as much importance.
