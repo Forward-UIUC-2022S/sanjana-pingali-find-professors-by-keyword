@@ -261,7 +261,7 @@ def get_author_citations(db):
     return dict_of_author_citation, max_value
 
 
-def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of_publication_flag, author_count_per_paper_flag, pioneer_flag):
+def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, author_count_per_paper_flag, pioneer_flag):
     """
     Main function that returns the top ranked authors for some keywords
     Arguments:
@@ -309,7 +309,7 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, frequency_of
     get_author_ranks_sql = """
         SELECT Author.id, Author.name, Author_Keyword_Scores.title,
         CASE 
-            WHEN """ + str(frequency_of_publication_flag) +""" = 1 THEN (publication_count_5_years/publication_count)*int_score
+            WHEN """ + str(year_flag) +""" = 1 THEN (publication_count_5_years/publication_count)*int_score
             ELSE int_score
         END AS score
         FROM Author_Keyword_Scores
@@ -383,8 +383,8 @@ def main():
     db = mysql.connector.connect(
     host='localhost',
     user="root",
-    password=<password>,
-    database=<database>
+    password="14converseS@",
+    database="database_week_4"
     )
     
     cur = db.cursor()
@@ -398,12 +398,11 @@ def main():
 
     year_flag =0
     citation_flag =0
-    frequency_of_publication_flag=0
     author_count_per_paper_flag=0
    
     if args.score_flag== 1:
         input_ = input("Which Features do you want to put emphasize on?")
-        year_flag, citation_flag,frequency_of_publication_flag,author_count_per_paper_flag =  input_.split(" ")
+        year_flag, citation_flag,author_count_per_paper_flag =  input_.split(" ")
 
 
     # Ids of all keywords can be found in FoS table
@@ -416,7 +415,7 @@ def main():
     result = cur.fetchall()
     keyword_ids = tuple(row_tuple[0] for row_tuple in result)
 
-    top_authors = rank_authors_keyword(keyword_ids, db, year_flag,citation_flag, frequency_of_publication_flag, author_count_per_paper_flag, args.pioneer_flag)
+    top_authors = rank_authors_keyword(keyword_ids, db, year_flag,citation_flag, author_count_per_paper_flag, args.pioneer_flag)
 
 if __name__ == '__main__':
     main()
