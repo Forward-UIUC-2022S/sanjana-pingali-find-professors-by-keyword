@@ -260,6 +260,51 @@ def get_author_citations(db):
 
     return dict_of_author_citation, max_value
 
+def generate_predictions(db,list_of_authors):
+    ''' Predicts how likely an author is going to publish more in next few years
+    Arguments:
+    - db: The current database
+    - list_of_authors: list of author ids of relevant authors
+    Returns: 
+    - None
+    '''
+    list_of_authors_across = []
+    year = 2020
+    list_of_years = [year-4, year-3, year-2, year-1, year]
+    x_train = []
+    y_train = []
+
+    for each_author in list_of_authors:
+        list_for_each_author = []
+        for year in list_of_years:
+            get_author_activity = """
+            SELECT author_id, SUM(comp_score)
+            FROM Author_Keyword_Scores
+            WHERE author_id = """ + str(each_author)+""" AND year = """ + str(year) + """
+            GROUP BY author_id
+        """
+        # populate score for each author
+            cur = db.cursor()
+            cur.execute(get_author_activity)
+            author_year_sum = cur.fetchall()
+            if len(author_year_sum) == 0:
+                 list_for_each_author.append(0)
+            else:
+                list_for_each_author.append(author_year_sum[0][1])
+        
+        y_train = list_for_each_author
+        x_train = (list_of_years)
+
+        model = interpolate.interp1d(np.array(x_train), np.array(y_train), fill_value = "extrapolate")
+        list_for_each_author.insert(0, each_author)
+      
+        list_for_each_author.append(np.gradient(np.array([model(year+1),model(year+2) ]))[0])
+        list_of_authors_across.append(list_for_each_author)
+
+    
+    dataframe_of_author_across_years = pd.DataFrame(list_of_authors_across, columns = ['author_id', 'current_year-4', 'current_year-3','current_year-2', 'current_year-1', 'current_year', 'gradient_prediction'])
+    dataframe_of_author_across_years.to_csv('predictions_table')
+
 
 def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, author_count_per_paper_flag, pioneer_flag):
     """
@@ -300,10 +345,13 @@ def rank_authors_keyword(keyword_ids, db, year_flag, citation_flag, author_count
         min_year = cur.fetchall()[0][0]
         
         cur.close()
+    
 
     list_of_authors, dict_of_authors, dict_of_author_keywords = get_authors(db, pioneer_flag, min_year, keyword_ids)
 
     dict_of_author_citation, max_value = get_author_citations(db)
+
+    generate_predictions(db, list_of_authors)
 
 
     get_author_ranks_sql = """
@@ -383,8 +431,8 @@ def main():
     db = mysql.connector.connect(
     host='localhost',
     user="root",
-    password=<password>,
-    database=<database>
+    password="14converseS@",
+    database="database_week_4"
     )
     
     cur = db.cursor()
@@ -406,7 +454,6 @@ def main():
 
 
     # Ids of all keywords can be found in FoS table
-    # Corresponds to keywords 'machine learning'
 
     fields_in_sql = gen_sql_in_tup(len(args.keywords))
     get_ids_sql =  """SELECT id FROM FoS where FoS_name IN """ + fields_in_sql + """;"""
