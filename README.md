@@ -31,6 +31,8 @@ sanjana-pingali-find-professors-by-keyword/
 ├── requirements.txt </br>
 └── README.md </br>
 
+The SQL dump data can be found https://drive.google.com/drive/folders/1XxSsbrMvgK_C4KdYcZvtd120co-NJqXQ?usp=sharing here.
+
 Functional Design
 -----------------------------
 store_keywords: For each input keyword this function generates 10 similar keywords to it.  </br>
