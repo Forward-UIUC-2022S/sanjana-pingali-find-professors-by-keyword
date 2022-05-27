@@ -4,7 +4,7 @@ Overview
 -----------------------------
 The goal of this module is to be able to rank professors whose papers appear in the MAG dataset based on their relation to keywords in a field. keywords are given as an input and this module ranks these professors based on two main categories. 
 
-The first metric is ranking professors based on whether they are pioneers in a field. The second metric, on the other hand, takes in different features that affect the ranking of professors to related keywords by impacting the score of the professors. These factors in the last metric include a ranking based on year of publication of the papers of the professors, based on the total number of citations of the professor, based on frequency of publications of the professor especially in more recent years and finally, based on whether there were more co-authors to papers they published (as opposed to them being the sole publisher).
+The first metric is ranking professors based on whether they are pioneers in a field. The second metric, on the other hand, takes in different features that affect the ranking of professors to related keywords by impacting the score of the professors. These factors in the last metric include a ranking based on year of publication of the papers of the professors and the frequency of publications of the professor especially in more recent year, based on the total number of citations of the professor, and based on whether there were more co-authors to papers they published (as opposed to them being the sole publisher).
 <br/>
 
 Demo
@@ -35,14 +35,10 @@ The SQL dump data can be found https://drive.google.com/drive/folders/1XxSsbrMvg
 
 Functional Design
 -----------------------------
-store_keywords: For each input keyword this function generates 10 similar keywords to it.  </br>
-author_count_per_paper: Stores number of authors for each paper  </br>
-compute_author_keyword_ranks: finds the score of how much each keyword matches a given paper.  </br>
-get_authors: Stores information related to authors such as the keywords associated with each, the papers associated with each and also gets list of viable authors for consideration.  </br>
-get_author_citations: obtains citation count for each author and also maximum citations for any author relating to all parent keywords.  </br>
-rank_authors_keyword:function that ranks the authors.  </br>
 
+rank_authors_keyword: The main function that relies on helper functions to help rank the researchers. Based on the input into the program there are four different flags that are passed into this function from main along with the input keyword ids and the database.
 
+The four flags passed in are used to evaluate whether a specific type of ranking should be inforced. The first one which is year is reliant on how often a researcher has published in more recent years. The second one is based on total number of citations the author has gotten on their paper. The third flag is whether the ranking should be based on them having more co-authors on a bunch of papers and finally, the last evaluates whether they are pioneers in a specific field.
 
 Algorithmic Design
 -----------------------------
